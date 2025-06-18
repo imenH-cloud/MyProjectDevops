@@ -84,12 +84,10 @@ pipeline {
                         docker tag backend-api-gateway:latest eline2016/backend-api-gateway:latest|| true
                         docker tag backend-user-service:latest eline2016/backend-user-service:latest || true
                         docker tag backend-auth-service:latest eline2016/backend-auth-service:latest || true
-                        docker tag backend-gateway-service:latest eline2016/backend-gateway-service:latest || true
 
                         docker push eline2016/backend-api-gateway:latest|| true
                         docker push eline2016/backend-user-service:latest || true
                         docker push eline2016/backend-auth-service:latest || true
-                        docker push eline2016/backend-gateway-service:latest || true
 
 
                         '''
@@ -120,14 +118,12 @@ aws ecr get-login-password --region eu-west-3 | docker login --username AWS --pa
                     docker push 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:frontend-user-latest
 
 
-                    docker tag backend-gateway-service:latest 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:backend-gateway-service-latest
                     docker tag backend-auth-service:latest 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:backend-auth-service-latest
                     docker tag backend-user-service:latest 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:backend-user-service-latest
                     docker tag backend-api-gateway:latest 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:backend-api-gateway-latest
 
 
                     docker push 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:backend-api-gateway-latest
-                    docker push 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:backend-gateway-service-latest
                     docker push 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:backend-user-service-latest
                     docker push 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:backend-auth-service-latest
 
