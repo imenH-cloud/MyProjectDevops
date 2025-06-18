@@ -9,7 +9,7 @@ services:
     ports:
       - "4200:4200"
     networks:
-      - my-shared-network
+      - app-network
     environment:
       - API_URL=http://api-gateway:3000
     depends_on:
@@ -24,7 +24,7 @@ services:
     ports:
       - "4201:80"
     networks:
-      - my-shared-network
+      - app-network
     environment:
       - API_URL=http://api-gateway:3000
 
@@ -36,11 +36,10 @@ services:
     ports:
       - "4202:80"
     networks:
-      - my-shared-network
+      - app-network
     environment:
       - API_URL=http://api-gateway:3000
 
 networks:
-  my-shared-network:
+  app-network:
     external: true
-
