@@ -95,7 +95,24 @@ pipeline {
                 }
             }
         }
-
+ stage('Scan Docker Images with Trivy') {
+            steps {
+                script {
+                    def images = [
+                        'frontend-getway-frontend:latest',
+                        'frontend-auth-frontend:latest',
+                        'frontend-user-frontend:latest',
+                        'backend-api-gateway:latest',
+                        'backend-user-service:latest',
+                        'backend-auth-service:latest'
+                    ]
+                    
+                    for (image in images) {
+                        sh "trivy image --exit-code 1 --severity CRITICAL,HIGH --format template --template \"@/usr/local/share/trivy/templates/html.tpl\" -o trivy-report-${image.replace(':', '-')}.html ${image}"
+                    }
+                }
+            }
+        }
       stage('Push Docker Image to ECR AWS') {
     steps {
         script {
