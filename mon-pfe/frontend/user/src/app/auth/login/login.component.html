@@ -1,0 +1,162 @@
+<div class="min-h-screen flex items-center justify-center bg-slate-50 p-4">
+  <div class="w-full max-w-md space-y-6">
+    
+    <!-- Header avec logo -->
+    <div class="flex flex-col items-center space-y-2 text-center">
+      <div class="rounded-full bg-blue-600 p-2">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="h-10 w-10 text-white"
+        >
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+          <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" />
+        </svg>
+      </div>
+      <h1 class="text-3xl font-bold tracking-tight text-gray-900">
+        School Management System
+      </h1>
+      <p class="text-slate-500">Administrator Access Portal</p>
+    </div>
+
+    <!-- Carte de connexion -->
+    <div class="bg-white shadow-lg rounded-lg border border-gray-200">
+      <!-- Header de la carte -->
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h2 class="text-xl font-semibold text-gray-900">Administrator Login</h2>
+        <p class="text-sm text-gray-600 mt-1">
+          Please enter your credentials to access the school administration system
+        </p>
+      </div>
+
+      <!-- Formulaire -->
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="px-6 py-4 space-y-4">
+        
+        <!-- Message d'erreur global -->
+        <div 
+          *ngIf="error" 
+          class="flex items-center space-x-2 p-3 bg-red-50 border border-red-200 rounded-lg"
+        >
+          <svg class="h-4 w-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+          </svg>
+          <span class="text-red-700 text-sm">{{ error }}</span>
+        </div>
+
+        <!-- Champ Username -->
+        <div class="space-y-2">
+          <label for="username" class="block text-sm font-medium text-gray-700">
+            Username or Email
+          </label>
+          <div class="relative">
+            <svg class="absolute left-3 top-3 h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+            </svg>
+            <input
+              id="username"
+              type="email"
+              formControlName="email"
+              placeholder="admin@schoolname.edu"
+              class="block w-full pl-10 pr-3 py-2 border rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              [class.border-red-300]="isFieldInvalid('username')"
+              [class.border-gray-300]="!isFieldInvalid('username')"
+            />
+          </div>
+          <p *ngIf="isFieldInvalid('username')" class="text-red-600 text-xs">
+            {{ getFieldError('username') }}
+          </p>
+        </div>
+
+        <!-- Champ Password -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label for="password" class="block text-sm font-medium text-gray-700">
+              Password
+            </label>
+            <button 
+              type="button"
+              class="text-xs text-blue-600 hover:text-blue-500 focus:outline-none"
+            >
+              Forgot password?
+            </button>
+          </div>
+          <div class="relative">
+            <svg class="absolute left-3 top-3 h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+            </svg>
+            <input
+              id="password"
+              [type]="showPassword ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="Enter your password"
+              class="block w-full pl-10 pr-12 py-2 border rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              [class.border-red-300]="isFieldInvalid('password')"
+              [class.border-gray-300]="!isFieldInvalid('password')"
+            />
+            <button
+              type="button"
+              (click)="togglePasswordVisibility()"
+              class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none"
+            >
+              <svg *ngIf="!showPassword" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+              </svg>
+              <svg *ngIf="showPassword" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"/>
+              </svg>
+              <span class="sr-only">{{ showPassword ? 'Hide password' : 'Show password' }}</span>
+            </button>
+          </div>
+          <p *ngIf="isFieldInvalid('password')" class="text-red-600 text-xs">
+            {{ getFieldError('password') }}
+          </p>
+        </div>
+
+        <!-- Remember me checkbox -->
+        <div class="flex items-center space-x-2">
+          <input
+            id="rememberMe"
+            type="checkbox"
+            formControlName="rememberMe"
+            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+          />
+          <label for="rememberMe" class="text-sm font-medium text-gray-700">
+            Keep me signed in
+          </label>
+        </div>
+
+        <!-- Submit button -->
+        <button
+          type="submit"
+          [disabled]="isLoading"
+          class="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          <svg 
+            *ngIf="isLoading" 
+            class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" 
+            xmlns="http://www.w3.org/2000/svg" 
+            fill="none" 
+            viewBox="0 0 24 24"
+          >
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          {{ isLoading ? 'Authenticating...' : 'Sign in to Dashboard' }}
+        </button>
+      </form>
+    </div>
+
+    <!-- Footer -->
+    <div class="text-center text-sm text-slate-500 space-y-1">
+      <p>Protected access for school administrators only</p>
+    </div>
+  </div>
+</div>

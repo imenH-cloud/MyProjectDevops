@@ -1,0 +1,98 @@
+// Fichier à créer dans C:\Users\pc\Desktop\autisme-pfe-main\frontend\Jenkinsfile
+pipeline {
+    agent any
+    
+    environment {
+        DOCKER_REGISTRY = 'eline2016'
+        VERSION = "${env.BUILD_NUMBER}"
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        
+        stage('Build Frontend Apps') {
+            parallel {
+                stage('Build Auth Frontend') {
+                    steps {
+                        dir('auth') {
+                            sh 'npm install'
+                            sh 'npm run build'
+                        }
+                    }
+                }
+                
+                stage('Build User Frontend') {
+                    steps {
+                        dir('user') {
+                            sh 'npm install'
+                            sh 'npm run build'
+                        }
+                    }
+                }
+                
+                stage('Build Gateway Frontend') {
+                    steps {
+                        dir('getway') {
+                            sh 'npm install'
+                            sh 'npm run build'
+                        }
+                    }
+                }
+            }
+        }
+        
+        stage('Build Docker Images') {
+            steps {
+                sh 'docker-compose build'
+            }
+        }
+        
+        stage('Push Docker Images') {
+            steps {
+                withCredentials([string(credentialsId: 'docker-hub-password', variable: 'DOCKER_HUB_PASSWORD')]) {
+                    sh "echo ${DOCKER_HUB_PASSWORD} | docker login -u ${DOCKER_REGISTRY} --password-stdin"
+                    
+                    sh "docker tag frontend_auth-frontend ${DOCKER_REGISTRY}/autisme-auth-frontend:${VERSION}"
+                    sh "docker tag frontend_user-frontend ${DOCKER_REGISTRY}/autisme-user-frontend:${VERSION}"
+                    sh "docker tag frontend_getway-frontend ${DOCKER_REGISTRY}/autisme-getway-frontend:${VERSION}"
+                    
+                    sh "docker push ${DOCKER_REGISTRY}/autisme-auth-frontend:${VERSION}"
+                    sh "docker push ${DOCKER_REGISTRY}/autisme-user-frontend:${VERSION}"
+                    sh "docker push ${DOCKER_REGISTRY}/autisme-getway-frontend:${VERSION}"
+                    
+                    // Tag as latest
+                    sh "docker tag ${DOCKER_REGISTRY}/autisme-auth-frontend:${VERSION} ${DOCKER_REGISTRY}/autisme-auth-frontend:latest"
+                    sh "docker tag ${DOCKER_REGISTRY}/autisme-user-frontend:${VERSION} ${DOCKER_REGISTRY}/autisme-user-frontend:latest"
+                    sh "docker tag ${DOCKER_REGISTRY}/autisme-getway-frontend:${VERSION} ${DOCKER_REGISTRY}/autisme-getway-frontend:latest"
+                    
+                    sh "docker push ${DOCKER_REGISTRY}/autisme-auth-frontend:latest"
+                    sh "docker push ${DOCKER_REGISTRY}/autisme-user-frontend:latest"
+                    sh "docker push ${DOCKER_REGISTRY}/autisme-getway-frontend:latest"
+                }
+            }
+        }
+        
+        stage('Deploy') {
+            steps {
+                sh 'docker-compose up -d'
+            }
+        }
+    }
+    
+    post {
+        always {
+            sh 'docker-compose logs'
+            cleanWs()
+        }
+        success {
+            echo 'Frontend pipeline completed successfully!'
+        }
+        failure {
+            echo 'Frontend pipeline failed!'
+        }
+    }
+}
