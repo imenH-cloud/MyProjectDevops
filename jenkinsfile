@@ -95,24 +95,35 @@ pipeline {
                 }
             }
         }
- stage('Scan Docker Images with Trivy') {
-            steps {
-                script {
-                    def images = [
-                        'frontend-getway-frontend:latest',
-                        'frontend-auth-frontend:latest',
-                        'frontend-user-frontend:latest',
-                        'backend-api-gateway:latest',
-                        'backend-user-service:latest',
-                        'backend-auth-service:latest'
-                    ]
-                    
-                    for (image in images) {
-                        sh "trivy image --exit-code 1 --severity CRITICAL,HIGH --format template --template \"@/usr/local/share/trivy/templates/html.tpl\" -o trivy-report-${image.replace(':', '-')}.html ${image}"
-                    }
-                }
+stage('Scan Docker Images with Trivy') {
+    agent {
+        docker {
+            image 'aquasec/trivy:0.49.1'
+            args '-v /var/run/docker.sock:/var/run/docker.sock --security-opt seccomp=unconfined'
+            reuseNode true
+        }
+    }
+    steps {
+        script {
+            def images = [
+                'frontend-getway-frontend:latest',
+                'frontend-auth-frontend:latest',
+                'frontend-user-frontend:latest',
+                'backend-api-gateway:latest',
+                'backend-user-service:latest',
+                'backend-auth-service:latest'
+            ]
+            
+            // Pré-téléchargement de la DB vulnérabilités
+            sh 'trivy image --download-db-only'
+            
+            for (image in images) {
+                // Scan rapide vulnérabilités uniquement (CRITICAL/HIGH)
+                sh "trivy image --scanners vuln --skip-db-update --exit-code 1 --severity CRITICAL,HIGH --format template --template \"@/usr/local/share/trivy/templates/html.tpl\" -o trivy-report-${image.replace(':', '-')}.html ${image}"
             }
         }
+    }
+}
       stage('Push Docker Image to ECR AWS') {
     steps {
         script {
