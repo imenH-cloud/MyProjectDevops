@@ -1,0 +1,170 @@
+pipeline {
+    agent any
+ parameters {
+        string(
+            name: 'email',
+            defaultValue: 'bboufateha@gmail.com',
+            description: 'Email address to send notification'
+        )
+    }
+
+    stages {
+        stage('Clone From Gitlab') {
+            steps {
+                git branch: 'main', 
+                credentialsId: 'Gitlab', 
+                url: 'git@github.com:imenH-cloud/MyProjectDevops.git'
+            }
+        }         
+
+
+
+   
+
+        stage('Clean Docker frontend ') {
+            steps {
+                script {
+                dir('mon-pfe/frontend') {
+                    sh '''
+                        docker-compose down || true
+                        docker rmi -f frontend-getway-frontend:latest || true
+                        docker rmi -f frontend-auth-frontend:latest || true
+                        docker rmi -f frontend-user-frontend:latest || true
+
+                    '''
+}
+                }
+            }
+        }
+
+                stage('Clean Docker Backend ') {
+            steps {
+                script {
+                dir('mon-pfe/backend') {
+
+                    sh '''
+                        docker-compose down || true
+                        docker rmi -f backend-api-gateway:latest || true
+                        docker rmi -f backend-user-service:latest || true
+                        docker rmi -f backend-auth-service:latest || true
+                        docker rmi -f backend-gateway-service:latest || true
+
+                    '''
+                }}
+            }
+        }
+
+        stage('Buid Images Docker & Run conatiners frontend ') {
+            steps {
+                script {
+                dir('mon-pfe/frontend') {
+                    sh 'docker-compose up -d '
+                }}
+            }
+        }
+        stage('Buid Images Docker & Run conatiners backend ') {
+            steps {
+                script {
+                dir('mon-pfe/backend') {
+
+                    sh 'docker-compose up -d '
+                }
+            }}
+        }
+
+
+        stage('Push Docker Image to Docker Hub') {
+            steps {
+                script {
+                    withDockerRegistry([credentialsId: "Dockerhub", url: ""]) {
+                        sh '''
+                        docker tag frontend-getway-frontend:latest eline2016/frontend-getway-frontend:latest || true
+                        docker tag frontend-auth-frontend:latest eline2016/frontend-auth-frontend:latest || true
+                        docker tag frontend-user-frontend:latest eline2016/frontend-user-frontend:latest || true
+
+                        docker push eline2016/frontend-getway-frontend:latest || true
+                        docker push eline2016/frontend-auth-frontend:latest || true
+                        docker push eline2016/frontend-user-frontend:latest || true
+
+
+                        docker tag backend-api-gateway:latest eline2016/backend-api-gateway:latest|| true
+                        docker tag backend-user-service:latest eline2016/backend-user-service:latest || true
+                        docker tag backend-auth-service:latest eline2016/backend-auth-service:latest || true
+                        docker tag backend-gateway-service:latest eline2016/backend-gateway-service:latest || true
+
+                        docker push eline2016/backend-api-gateway:latest|| true
+                        docker push eline2016/backend-user-service:latest || true
+                        docker push eline2016/backend-auth-service:latest || true
+                        docker push eline2016/backend-gateway-service:latest || true
+
+
+                        '''
+                    }
+                }
+            }
+        }
+
+      stage('Push Docker Image to ECR AWS') {
+    steps {
+        script {
+            echo "Push images to ECR AWS..."
+            withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'ECR']]) {
+                sh """
+                    echo "Connexion ECR AWS..."
+                    aws ecr get-login-password --region eu-north-1 | docker login --username AWS --password-stdin 913524945783.dkr.ecr.eu-north-1.amazonaws.com
+                """
+                
+
+                // Ici on tag et push avec interpolation Groovy (note l'utilisation de ${})
+                sh """
+                    docker tag pfe-image:latest 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:frontend-getway-latest
+                    docker tag pfe-image:latest 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:frontend-user-latest
+                    docker tag pfe-image:latest 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:frontend-auth-latest
+
+
+                    docker push 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:frontend-getway-latest
+                    docker push 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:frontend-auth-latest
+                    docker push 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:frontend-user-latest
+
+
+                    docker tag pfe-image:latest 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:backend-gateway-service-latest
+                    docker tag pfe-image:latest 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:backend-auth-service-latest
+                    docker tag pfe-image:latest 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:backend-user-service-latest
+                    docker tag pfe-image:latest 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:backend-api-gateway-latest
+
+
+                    docker push 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:backend-api-gateway-latest
+                    docker push 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:backend-gateway-service-latest
+                    docker push 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:backend-user-service-latest
+                    docker push 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:backend-auth-service-latest
+
+                """
+            }
+        }
+    }
+}
+
+
+       
+
+    }  
+
+    post {
+        always {
+            script {
+                def status = currentBuild.currentResult
+
+                // Slack notification
+                slackSend(
+                    channel: '#devops',
+                    color: status == 'SUCCESS' ? 'good' : 'danger',
+                    message: "${status == 'SUCCESS' ? ':white_check_mark:' : ':x:'} Pipeline ${currentBuild.fullDisplayName} - ${status}\n" +
+                             "• Job: ${env.JOB_NAME} #${env.BUILD_NUMBER}\n" +
+                             "• URL: ${env.BUILD_URL}"
+                )
+
+               
+            }
+        }
+    }
+}
