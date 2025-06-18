@@ -47,7 +47,7 @@ services:
     networks:
       - default
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      test: ["CMD", "curl", "-f", "http://15.236.190.137:3002/health"]
       interval: 10s
       timeout: 5s
       retries: 5

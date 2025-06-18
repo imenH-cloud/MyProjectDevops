@@ -13,7 +13,7 @@ export interface Teacher {
   providedIn: 'root'
 })
 export class TeacherService {
-  private baseUrl = 'http://localhost:3000/teachers'; // Update if your backend URL is different
+  private baseUrl = 'http://15.236.190.137:3000/teachers'; // Update if your backend URL is different
 
   constructor(private http: HttpClient) {}
 

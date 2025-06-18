@@ -8,7 +8,7 @@ import { CreateUserDto, UpdateUserDto, User } from './user';
   providedIn: 'root'
 })
 export class UserService {
-  private apiUrl = 'http://localhost:3002/user'; // Adjust to your API URL
+  private apiUrl = 'http://15.236.190.137:3002/user'; // Adjust to your API URL
 
   constructor(private http: HttpClient) {}
 

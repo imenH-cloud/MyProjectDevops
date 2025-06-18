@@ -8,7 +8,7 @@ import { Parent, CreateParentDto, UpdateParentDto } from './parent';
   providedIn: 'root'
 })
 export class ParentService {
-  private apiUrl = 'http://localhost:3000/parent'; // Adjust to your API URL
+  private apiUrl = 'http://15.236.190.137:3000/parent'; // Adjust to your API URL
 
   constructor(private http: HttpClient) {}
 

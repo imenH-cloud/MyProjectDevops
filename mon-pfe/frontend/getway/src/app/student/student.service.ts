@@ -13,7 +13,7 @@ export interface CreateStudentDto {
   providedIn: 'root'
 })
 export class StudentService {
-  private apiUrl = 'http://localhost:3000/student';
+  private apiUrl = 'http://15.236.190.137:3000/student';
 
   constructor(private http: HttpClient) {}
 
