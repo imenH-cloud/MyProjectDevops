@@ -24,7 +24,7 @@ pipeline {
         stage('Clean Docker frontend ') {
             steps {
                 script {
-                dir('mon-pfe/frontend') {
+                dir('frontend') {
                     sh '''
                         docker-compose down || true
                         docker rmi -f frontend-getway-frontend:latest || true
@@ -40,7 +40,7 @@ pipeline {
                 stage('Clean Docker Backend ') {
             steps {
                 script {
-                dir('mon-pfe/backend') {
+                dir('backend') {
 
                     sh '''
                         docker-compose down || true
@@ -57,7 +57,7 @@ pipeline {
         stage('Buid Images Docker & Run conatiners frontend ') {
             steps {
                 script {
-                dir('mon-pfe/frontend') {
+                dir('frontend') {
                     sh 'docker-compose up -d '
                 }}
             }
@@ -65,7 +65,7 @@ pipeline {
         stage('Buid Images Docker & Run conatiners backend ') {
             steps {
                 script {
-                dir('mon-pfe/backend') {
+                dir('backend') {
 
                     sh 'docker-compose up -d '
                 }
