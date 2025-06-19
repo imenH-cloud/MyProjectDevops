@@ -1,0 +1,18 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:CreateVpc",
+                "ec2:AllocateAddress",
+                "iam:CreateRole",
+                "iam:CreatePolicy",
+                "iam:AttachRolePolicy",
+                "iam:PutRolePolicy",
+                "iam:PassRole"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
