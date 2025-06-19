@@ -3,7 +3,7 @@ pipeline {
 
 
     stages {
-        stage('Clone From Gitlab') {
+        stage('Clone From Github') {
             steps {
                 git branch: 'main', 
                 credentialsId: 'Gitlab', 
