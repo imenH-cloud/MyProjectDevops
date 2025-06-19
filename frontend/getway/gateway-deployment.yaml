@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gateway-frontend
+  template:
+    metadata:
+      labels:
+        app: gateway-frontend
+    spec:
+      containers:
+        - name: gateway-frontend
+          image: eline2016/frontend-getway-frontend:latest
+          env:
+            - name: API_URL
+              value: "http://api-gateway:3000"
+          ports:
+            - containerPort: 80
