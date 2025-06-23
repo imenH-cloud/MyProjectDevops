@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  getway-frontend:
+    build:
+      context: ./getway
+      dockerfile: Dockerfile
+
+  auth-frontend:
+    build:
+      context: ./auth
+      dockerfile: Dockerfile
+
+  user-frontend:
+    build:
+      context: ./user
+      dockerfile: Dockerfile
