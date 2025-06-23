@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  api-gateway:
+    build:
+      context: ./getway
+      dockerfile: Dockerfile
+
+  user-service:
+    build:
+      context: ./user
+      dockerfile: Dockerfile
+
+  auth-service:
+    build:
+      context: ./auth
+      dockerfile: Dockerfile
