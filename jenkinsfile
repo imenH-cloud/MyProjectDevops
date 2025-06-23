@@ -1,0 +1,221 @@
+pipeline {
+    agent any
+
+
+    stages {
+        stage('Clone From Github') {
+            steps {
+                git branch: 'k8s', 
+                credentialsId: 'Gitlab', 
+                url: 'git@github.com:imenH-cloud/MyProjectDevops.git'
+            }
+        }         
+
+
+
+   
+
+        stage('Clean Docker frontend ') {
+            steps {
+                script {
+                dir('frontend') {
+                    sh '''
+                        docker-compose down || true
+                        docker rmi -f frontend-getway-frontend:latest || true
+                        docker rmi -f frontend-auth-frontend:latest || true
+                        docker rmi -f frontend-user-frontend:latest || true
+
+                        docker rmi -f eline2016/frontend-getway-frontend:latest || true
+                        docker rmi -f eline2016/frontend-auth-frontend:latest || true
+                        docker rmi -f eline2016/frontend-user-frontend:latest || true
+
+                    docker rmi -f 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:frontend-getway-latest
+                    docker rmi -f 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:frontend-auth-latest
+                    docker rmi -f 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:frontend-user-latest
+
+                    '''
+}
+                }
+            }
+        }
+
+                stage('Clean Docker Backend ') {
+            steps {
+                script {
+                dir('backend') {
+
+                    sh '''
+                        docker-compose down || true
+                        docker rmi -f backend-api-gateway:latest || true
+                        docker rmi -f backend-user-service:latest || true
+                        docker rmi -f backend-auth-service:latest || true
+
+                        docker rmi -f eline2016/backend-api-gateway:latest|| true
+                        docker rmi -f eline2016/backend-user-service:latest || true
+                        docker rmi -f eline2016/backend-auth-service:latest || true
+
+
+                    docker rmi -f 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:backend-api-gateway-latest
+                    docker rmi -f 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:backend-user-service-latest
+                    docker rmi -f 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:backend-auth-service-latest
+
+
+                    '''
+                }}
+            }
+        }
+
+        stage('Buid Images Docker & Run conatiners frontend ') {
+            steps {
+                script {
+                dir('frontend') {
+                    sh 'docker-compose up -d '
+                }}
+            }
+        }
+        stage('Buid Images Docker & Run conatiners backend ') {
+            steps {
+                script {
+                dir('backend') {
+
+                    sh 'docker-compose up -d '
+                }
+            }}
+        }
+
+stage('Scan Docker Images with Trivy') {
+    steps {
+        script {
+            // Liste des images à scanner
+            def images = [
+                'frontend-getway-frontend:latest',
+                'frontend-auth-frontend:latest',
+                'frontend-user-frontend:latest',
+                'backend-api-gateway:latest',
+                'backend-user-service:latest',
+                'backend-auth-service:latest'
+            ]
+            
+            // Scanner chaque image
+            for (image in images) {
+                sh """
+                    # Vérifier que l'image existe localement
+                    docker image inspect ${image} > /dev/null 2>&1
+                    
+                    # Exécuter le scan Trivy
+                    trivy image \
+                        --exit-code 0 \
+                        --severity CRITICAL,HIGH \
+                        --format template \
+                        --template '@/usr/local/share/trivy/templates/html.tpl' \
+                        -o trivy-report-${image.replace(':', '-')}.html \
+                        ${image}
+                """
+            }
+        }
+    }
+}
+        stage('Push Docker Image to Docker Hub') {
+            steps {
+                script {
+                    withDockerRegistry([credentialsId: "Dockerhub", url: ""]) {
+                        sh '''
+                        docker tag frontend-getway-frontend:latest eline2016/frontend-getway-frontend:latest || true
+                        docker tag frontend-auth-frontend:latest eline2016/frontend-auth-frontend:latest || true
+                        docker tag frontend-user-frontend:latest eline2016/frontend-user-frontend:latest || true
+
+                        docker push eline2016/frontend-getway-frontend:latest || true
+                        docker push eline2016/frontend-auth-frontend:latest || true
+                        docker push eline2016/frontend-user-frontend:latest || true
+
+
+                        docker tag backend-api-gateway:latest eline2016/backend-api-gateway:latest|| true
+                        docker tag backend-user-service:latest eline2016/backend-user-service:latest || true
+                        docker tag backend-auth-service:latest eline2016/backend-auth-service:latest || true
+
+                        docker push eline2016/backend-api-gateway:latest|| true
+                        docker push eline2016/backend-user-service:latest || true
+                        docker push eline2016/backend-auth-service:latest || true
+
+
+                        '''
+                    }
+                }
+            }
+        }
+
+      stage('Push Docker Image to ECR AWS') {
+    steps {
+        script {
+            echo "Push images to ECR AWS..."
+            withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'ECR']]) {
+                sh """
+                    echo "Connexion ECR AWS..."
+aws ecr get-login-password --region eu-west-3 | docker login --username AWS --password-stdin 380278406007.dkr.ecr.eu-west-3.amazonaws.com                """
+                
+
+                // Ici on tag et push avec interpolation Groovy (note l'utilisation de ${})
+                sh """
+                    docker tag frontend-getway-frontend:latest 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:frontend-getway-latest
+                    docker tag frontend-user-frontend:latest 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:frontend-user-latest
+                    docker tag frontend-auth-frontend:latest 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:frontend-auth-latest
+
+
+                    docker push 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:frontend-getway-latest
+                    docker push 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:frontend-auth-latest
+                    docker push 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:frontend-user-latest
+
+
+                    docker tag backend-auth-service:latest 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:backend-auth-service-latest
+                    docker tag backend-user-service:latest 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:backend-user-service-latest
+                    docker tag backend-api-gateway:latest 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:backend-api-gateway-latest
+
+
+                    docker push 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:backend-api-gateway-latest
+                    docker push 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:backend-user-service-latest
+                    docker push 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:backend-auth-service-latest
+
+                """
+            }
+        }
+    }
+}
+
+
+     stage('Deploy with kubernetes') {
+            steps {
+                script {
+                   withKubeConfig(credentialsId: 'k8s', serverUrl: 'https://172.31.33.65:6443') {
+
+                        sh '''
+                      kubectl delete -f k8s/ || true
+                      kubectl apply -f k8s/
+
+                        '''
+                    }
+                }
+            }
+        }
+   
+
+    }  
+
+    post {
+        always {
+            script {
+                def status = currentBuild.currentResult
+
+                // Slack notification
+                slackSend(
+                    channel: '#devops',
+                    color: status == 'SUCCESS' ? 'good' : 'danger',
+                    message: "${status == 'SUCCESS' ? ':white_check_mark:' : ':x:'} Pipeline ${currentBuild.fullDisplayName} - ${status}\n" +
+                             "• Job: ${env.JOB_NAME} #${env.BUILD_NUMBER}\n" +
+                             "• URL: ${env.BUILD_URL}"
+                )
+
+               
+            }
+        }
+    }
+}
