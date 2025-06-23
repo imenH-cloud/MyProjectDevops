@@ -129,7 +129,7 @@ stage('Scan Docker Images with Trivy') {
                         docker push eline2016/frontend-user-frontend:latest || true
 
 
-                        docker tag backend-api-gateway:latest eline2016/backend-api-gateway:latest|| true
+                        docker tag backend-api-gateway:latest eline2016/backend-api-gateway:latest || true
                         docker tag backend-user-service:latest eline2016/backend-user-service:latest || true
                         docker tag backend-auth-service:latest eline2016/backend-auth-service:latest || true
 
@@ -188,8 +188,32 @@ aws ecr get-login-password --region eu-west-3 | docker login --username AWS --pa
                    withKubeConfig(credentialsId: 'k8s', serverUrl: 'https://172.31.33.65:6443') {
 
                         sh '''
-                      kubectl delete -f k8s/ || true
-                      kubectl apply -f k8s/
+
+# 1. Supprimer les services frontend
+kubectl delete -f k8s/frontend/gateway.yaml --validate=false || true
+kubectl delete -f k8s/frontend/user.yaml --validate=false || true
+kubectl delete -f k8s/frontend/auth.yaml --validate=false || true
+
+# 2. Supprimer les services backend
+kubectl delete -f k8s/backend/gateway.yaml --validate=false || true
+kubectl delete -f k8s/backend/user.yaml --validate=false || true
+kubectl delete -f k8s/backend/auth.yaml --validate=false || true
+
+# 3. Supprimer la base de données
+kubectl delete -f k8s/database.yaml --validate=false || true
+
+# 1. Appliquer la configuration de la base de données
+kubectl apply -f k8s/database.yaml --validate=false
+
+# 2. Appliquer les services backend
+kubectl apply -f k8s/backend/auth.yaml --validate=false
+kubectl apply -f k8s/backend/user.yaml --validate=false
+kubectl apply -f k8s/backend/gateway.yaml --validate=false
+
+# 3. Appliquer les services frontend
+kubectl apply -f k8s/frontend/auth.yaml --validate=false
+kubectl apply -f k8s/frontend/user.yaml --validate=false
+kubectl apply -f k8s/frontend/gateway.yaml --validate=false
 
                         '''
                     }
