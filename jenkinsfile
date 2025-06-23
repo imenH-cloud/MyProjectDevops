@@ -190,17 +190,17 @@ aws ecr get-login-password --region eu-west-3 | docker login --username AWS --pa
                         sh '''
 
 # 1. Supprimer les services frontend
-kubectl delete -f k8s/frontend/gateway.yaml --validate=false || true
-kubectl delete -f k8s/frontend/user.yaml --validate=false || true
-kubectl delete -f k8s/frontend/auth.yaml --validate=false || true
+kubectl delete -f k8s/frontend/gateway.yaml || true
+kubectl delete -f k8s/frontend/user.yaml  || true
+kubectl delete -f k8s/frontend/auth.yaml  || true
 
 # 2. Supprimer les services backend
-kubectl delete -f k8s/backend/gateway.yaml --validate=false || true
-kubectl delete -f k8s/backend/user.yaml --validate=false || true
-kubectl delete -f k8s/backend/auth.yaml --validate=false || true
+kubectl delete -f k8s/backend/gateway.yaml  || true
+kubectl delete -f k8s/backend/user.yaml || true
+kubectl delete -f k8s/backend/auth.yaml || true
 
 # 3. Supprimer la base de données
-kubectl delete -f k8s/database.yaml --validate=false || true
+kubectl delete -f k8s/database.yaml || true
 
 # 1. Appliquer la configuration de la base de données
 kubectl apply -f k8s/database.yaml --validate=false
