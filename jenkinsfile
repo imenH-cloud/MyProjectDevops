@@ -206,7 +206,7 @@ kubectl apply -f k8s/database-service.yaml || true
 
 # 1. Appliquer la configuration de la base de données
 
-kubectl apply -f pv-pvc-database.yaml --validate=false
+kubectl apply -f pv-pvc-database.yaml --validate=false || true
 
 kubectl apply -f k8s/database.yaml --validate=false 
 kubectl apply -f k8s/database-service.yaml --validate=false  
