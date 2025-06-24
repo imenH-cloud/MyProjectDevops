@@ -5,11 +5,11 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: postgres  # Doit correspondre au service
+      app: postgres
   template:
     metadata:
       labels:
-        app: postgres  # Doit correspondre ici
+        app: postgres
     spec:
       containers:
       - name: postgres
@@ -26,11 +26,24 @@ spec:
         volumeMounts:
         - mountPath: /var/lib/postgresql/data
           name: postgres-data
+        # Ajout de probes robustes
+        startupProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - "exec pg_isready -U postgres -h localhost"
+          failureThreshold: 30
+          periodSeconds: 5
         readinessProbe:
           exec:
-            command: ["pg_isready", "-U", "postgres"]
-          initialDelaySeconds: 10
+            command:
+            - sh
+            - -c
+            - "exec pg_isready -U postgres -h localhost"
+          initialDelaySeconds: 5
           periodSeconds: 5
+          failureThreshold: 5
       volumes:
       - name: postgres-data
         persistentVolumeClaim:
