@@ -20,7 +20,6 @@ pipeline {
                 script {
                 dir('frontend') {
                     sh '''
-                        docker-compose down || true
                         docker rmi -f frontend-getway-frontend:latest || true
                         docker rmi -f frontend-auth-frontend:latest || true
                         docker rmi -f frontend-user-frontend:latest || true
@@ -29,9 +28,9 @@ pipeline {
                         docker rmi -f eline2016/frontend-auth-frontend:latest || true
                         docker rmi -f eline2016/frontend-user-frontend:latest || true
 
-                    docker rmi -f 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:frontend-getway-latest
-                    docker rmi -f 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:frontend-auth-latest
-                    docker rmi -f 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:frontend-user-latest
+                        docker rmi -f 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:frontend-getway-latest
+                        docker rmi -f 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:frontend-auth-latest
+                        docker rmi -f 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:frontend-user-latest
 
                     '''
 }
@@ -55,9 +54,9 @@ pipeline {
                         docker rmi -f eline2016/backend-auth-service:latest || true
 
 
-                    docker rmi -f 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:backend-api-gateway-latest
-                    docker rmi -f 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:backend-user-service-latest
-                    docker rmi -f 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:backend-auth-service-latest
+                        docker rmi -f 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:backend-api-gateway-latest
+                        docker rmi -f 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:backend-user-service-latest
+                        docker rmi -f 380278406007.dkr.ecr.eu-west-3.amazonaws.com/ecr-repo:backend-auth-service-latest
 
 
                     '''
@@ -185,7 +184,7 @@ aws ecr get-login-password --region eu-west-3 | docker login --username AWS --pa
      stage('Deploy with kubernetes') {
             steps {
                 script {
-                   withKubeConfig(credentialsId: 'k8s', serverUrl: 'https://10.0.1.13:6443') {
+                   withKubeConfig(credentialsId: 'k8s', serverUrl: 'https://10.0.1.168:6443') {
 
                         sh '''
 
@@ -201,9 +200,16 @@ kubectl delete -f k8s/backend/auth.yaml || true
 
 # 3. Supprimer la base de données
 kubectl delete -f k8s/database.yaml || true
+kubectl apply -f k8s/database-service.yaml || true  
+
+#--------------------------------------------------------------------
 
 # 1. Appliquer la configuration de la base de données
-kubectl apply -f k8s/database.yaml --validate=false
+
+kubectl apply -f pv-pvc-database.yaml --validate=false
+
+kubectl apply -f k8s/database.yaml --validate=false 
+kubectl apply -f k8s/database-service.yaml --validate=false  
 
 # 2. Appliquer les services backend
 kubectl apply -f k8s/backend/auth.yaml --validate=false
