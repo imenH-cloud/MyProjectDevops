@@ -63,7 +63,7 @@ export class LoginComponent {
         }
       });
       
-      window.location.href='http://15.236.190.137:57813/user'
+      window.location.href='http://15.237.111.121:57813/user'
     } catch (error) {
       this.error = error instanceof Error ? error.message : 'Erreur de connexion';
     } finally {

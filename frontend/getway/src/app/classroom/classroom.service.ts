@@ -7,7 +7,7 @@ import { Classroom, CreateClassroomDto, UpdateClassroomDto } from './classroom';
   providedIn: 'root'
 })
 export class ClassroomService {
-  private apiUrl = 'http://15.236.190.137:3000/classroom';
+  private apiUrl = 'http://15.237.111.121:3000/classroom';
 
   constructor(private http: HttpClient) { }
 

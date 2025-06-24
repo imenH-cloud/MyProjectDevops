@@ -10370,7 +10370,7 @@ function getRoutesFromAngularRouterConfig(bootstrap, document2, url, invokeGetPr
       yield applicationRef.whenStable();
       const errors = [];
       const rawBaseHref = injector.get(APP_BASE_HREF, null, { optional: true }) ?? injector.get(PlatformLocation).getBaseHrefFromDOM();
-      const { pathname: baseHref } = new URL(rawBaseHref, "http://15.236.190.137");
+      const { pathname: baseHref } = new URL(rawBaseHref, "http://15.237.111.121");
       const compiler = injector.get(Compiler);
       const serverRoutesConfig = injector.get(SERVER_ROUTES_CONFIG, null, { optional: true });
       let serverConfigRouteTree;

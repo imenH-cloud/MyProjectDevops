@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
 })
 export default class AuthService {
  
-  private apiUrl = 'http://15.236.190.137:3001/';
+  private apiUrl = 'http://15.237.111.121:3001/';
 
 
   constructor(private http:HttpClient) { 

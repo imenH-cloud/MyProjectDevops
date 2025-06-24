@@ -21,7 +21,7 @@ async function bootstrap() {
   // Gateway écoute sur 3000
   await app.listen(3000, '0.0.0.0');
 
-  console.log(`Gateway is running at http://15.236.190.137:3000`);
-  console.log(`Swagger is available at http://15.236.190.137:3000/api`);
+  console.log(`Gateway is running at http://15.237.111.121:3000`);
+  console.log(`Swagger is available at http://15.237.111.121:3000/api`);
 }
 bootstrap();

@@ -17,7 +17,7 @@ import { jwtConstants } from './constants';
     //     name: 'USER_SERVICE',
     //     transport: Transport.TCP,
     //     options: {
-    //       host: process.env.USER_SERVICE_HOST || '15.236.190.137',
+    //       host: process.env.USER_SERVICE_HOST || '15.237.111.121',
     //       port: parseInt(process.env.USER_SERVICE_PORT || '3001', 10),
     //     },
     //   },

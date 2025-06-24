@@ -49,7 +49,7 @@ function run(): void {
   // Start up the Node server
   const server = app();
   server.listen(port, () => {
-    console.log(`Node Express server listening on http://15.236.190.137:${port}`);
+    console.log(`Node Express server listening on http://15.237.111.121:${port}`);
   });
 }
 

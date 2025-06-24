@@ -17,7 +17,7 @@ export class AuthService {
   async validateUser(email: string, pass: string): Promise<any> {
     try {
       const response = await firstValueFrom(
-        this.httpService.get(`http://15.236.190.137:3002/user/email/${email}`)
+        this.httpService.get(`http://15.237.111.121:3002/user/email/${email}`)
       );
       const user = response.data;
 
