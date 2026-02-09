@@ -1,0 +1,44 @@
+{
+    "name": "MyProjectDevops Codespace",
+    "image": "mcr.microsoft.com/devcontainers/javascript:0-20",
+    "features": {
+        "ghcr.io/devcontainers/features/node:1": {
+            "version": "lts"
+        },
+        "ghcr.io/devcontainers/features/docker-in-docker:1": {
+            "version": "latest"
+        },
+        "ghcr.io/devcontainers/features/aws-cli:1": {},
+        "ghcr.io/devcontainers/features/terraform:1": {},
+        "ghcr.io/devcontainers/features/github-cli:1": {}
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "dbaeumer.vscode-eslint",
+                "esbenp.prettier-vscode",
+                "ms-vscode.vscode-typescript-next",
+                "ms-azuretools.vscode-docker",
+                "hashicorp.terraform",
+                "ms-vscode.remote-repositories"
+            ]
+        }
+    },
+    "postCreateCommand": "npm install --prefix backend && npm install --prefix frontend && sudo apt-get update && sudo apt-get install -y postgresql-client",
+    "forwardPorts": [3000, 8080, 5432],
+    "portsAttributes": {
+        "3000": {
+            "label": "Frontend App",
+            "onAutoForward": "notify"
+        },
+        "8080": {
+            "label": "Backend API",
+            "onAutoForward": "notify"
+        },
+        "5432": {
+            "label": "PostgreSQL Database",
+            "onAutoForward": "ignore"
+        }
+    },
+    "remoteUser": "node"
+}
